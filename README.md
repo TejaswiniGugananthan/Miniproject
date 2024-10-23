@@ -1,10 +1,8 @@
 ## Title of the Project
-Small description about the project like one below
-The integration of a chatbot within a hostel booking system, aimed at streamlining the reservation process for students and improving the overall user experience.
+FORECASTING GOLD PRICE ON AN ECONOMIC DRIVEN MARKET
 
 ## About
-<!--Detailed Description about the project-->
-Tailored Chatbot for Hostel Booking System is a project designed to integrate a chatbot that leverages advanced natural language processing techniques to understand and respond to user queries to the hostel booking system. Traditional hostel booking processes are often time-consuming and involve manual searches and extensive communication with hostel staff. This project seeks to overcome these challenges by creating an easy-to-use chatbot interface that assists students in addressing inquiries.
+The Gold Price Prediction App addresses the challenge of forecasting future gold prices by analyzing          various economic indicators, such as inflation rates, unemployment rates, and GDP. Gold prices are influenced by numerous complex factors, making accurate predictions difficult. This project aims to provide users with a machine learning-based solution that simplifies the process of predicting gold prices using historical data and economic trends. By offering a comparison of multiple models and allowing users to input future economic conditions, the app empowers users to make data-driven decisions about gold price movements.
 
 ## Features
 <!--List the features of the project as shown below-->
@@ -25,10 +23,8 @@ Tailored Chatbot for Hostel Booking System is a project designed to integrate a 
 * Additional Dependencies: Includes scikit-learn, TensorFlow (versions 2.4.1), TensorFlow GPU, OpenCV, and Mediapipe for deep learning tasks.
 
 ## System Architecture
-<!--Embed the system architecture diagram as shown below-->
 
-![Screenshot 2023-11-25 133637](https://github.com/<<yourusername>>/Hand-Gesture-Recognition-System/assets/75235455/a60c11f3-0a11-47fb-ac89-755d5f45c995)
-
+![image](https://github.com/user-attachments/assets/2976e8ae-2783-40cc-b116-9627067d2c53)
 
 ## Output
 
