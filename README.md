@@ -26,9 +26,224 @@ The Gold Price Prediction App addresses the challenge of forecasting future gold
 
 ![image](https://github.com/user-attachments/assets/2976e8ae-2783-40cc-b116-9627067d2c53)
 
+## Program:
+```python
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+gold_prices = pd.read_csv('gold_price_china.csv')
+economic_data = pd.read_csv('china-inflation(1).csv')
+
+gold_prices.shape
+
+gold_prices.head()
+
+gold_prices.info()
+
+gold_prices.describe()
+
+economic_data.shape
+
+economic_data.tail()
+
+economic_data.info()
+
+economic_data.describe()
+
+data = pd.merge(gold_prices, economic_data, on='Date',how='left')
+
+data.tail(10)
+
+data.info()
+
+data['Date'] = pd.to_datetime(data['Date'])
+
+data.sort_values('Date', inplace=True)
+
+data['Date'] = pd.to_datetime(data['Date'])
+
+# Plotting the average closing price
+plt.figure(figsize=(10, 6))
+plt.plot(data['Date'], data['Average Closing Price'], color='navy', linewidth=2)
+
+# Adding labels and title
+plt.title('Average Closing Price Over Time', fontsize=16, weight='bold')
+plt.xlabel('Date', fontsize=12)
+plt.ylabel('Average Closing Price', fontsize=12)
+
+# Adding grid and adjusting style similar to the uploaded graph
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.xticks(rotation=45)
+plt.tight_layout()
+
+# Display the plot
+plt.show()
+
+correlation_matrix = data.corr()
+print(correlation_matrix)
+
+correlation_columns = ['Average Closing Price', 'Interest Rate', 'Inflation Rate ', 'GDP', 'Tariff Rate']
+
+# Calculate the correlation matrix
+correlation_matrix = data[correlation_columns].corr()
+
+# Plot the heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', linewidths=0.5, linecolor='black', fmt=".2f")
+
+# Customize plot
+plt.title('Correlation Heatmap of Gold Prices and Economic Indicators', fontsize=16)
+plt.xticks(rotation=45)
+plt.yticks(rotation=45)
+plt.show()
+
+df = pd.DataFrame(data)
+
+df['Interest Rate'].fillna(df['Interest Rate'].mean(), inplace=True)
+df['Inflation Rate '].fillna(df['Inflation Rate '].mean(), inplace=True)
+df['GDP'].fillna(df['GDP'].mean(), inplace=True)
+df['Tariff Rate'].fillna(df['Tariff Rate'].mean(), inplace=True)
+
+label_encoder = LabelEncoder()
+df['Interest Rate'] = label_encoder.fit_transform(df['Interest Rate'])
+
+scaler = StandardScaler()
+data[['Interest Rate', 'Inflation Rate ', 'GDP', 'Tariff Rate']] = scaler.fit_transform(
+    data[['Interest Rate', 'Inflation Rate ', 'GDP', 'Tariff Rate']])
+
+# Select features and target
+features = ['Interest Rate', 'Inflation Rate ', 'GDP', 'Tariff Rate']
+X = data[features]
+y = data['Average Closing Price']
+
+print(X.isnull().sum())
+
+print(y.isnull().sum())
+
+features = ['Interest Rate','Inflation Rate ','GDP','Tariff Rate'] 
+X = df[features]
+y = df['Average Closing Price']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+models = {
+    'Random Forest': RandomForestRegressor(n_estimators=100, random_state=42),
+    'Gradient Boosting': GradientBoostingRegressor(n_estimators=100, random_state=42),
+    'Decision Tree': DecisionTreeRegressor(random_state=42),
+    'K-Nearest Neighbors': KNeighborsRegressor(n_neighbors=5)
+}
+
+model_metrics = {}
+predicted_values = {}
+
+for model_name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    
+    mae = mean_absolute_error(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(y_test, y_pred)
+    
+    model_metrics[model_name] = {'MAE': mae, 'MSE': mse, 'RMSE': rmse, 'R²': r2}
+    predicted_values[model_name] = y_pred
+    
+    print(f"\n{model_name}:")
+    print(f"Mean Absolute Error: {mae}")
+    print(f"Mean Squared Error: {mse}")
+    print(f"Root Mean Squared Error: {rmse}")
+    print(f"R-squared: {r2}")
+    print(f"Predicted Values: {y_pred}")
+
+metrics_df = pd.DataFrame(model_metrics).T
+
+# Assuming X_train, y_train, X_test, y_test are defined and your model is already trained
+
+# Predict on both training and test sets
+y_train_pred = model.predict(X_train)
+y_test_pred = model.predict(X_test)
+
+# Calculate residuals (actual - predicted)
+train_residuals = y_train - y_train_pred
+test_residuals = y_test - y_test_pred
+
+# Plotting the residuals for training and testing sets
+plt.figure(figsize=(14, 6))
+
+# Training set residuals
+plt.subplot(1, 2, 1)
+plt.scatter(y_train_pred, train_residuals, alpha=0.5)
+plt.hlines(y=0, xmin=min(y_train_pred), xmax=max(y_train_pred), colors='red')
+plt.xlabel('Predicted Values')
+plt.ylabel('Residuals')
+plt.title('Training Set Residuals')
+
+# Testing set residuals
+plt.subplot(1, 2, 2)
+plt.scatter(y_test_pred, test_residuals, alpha=0.5)
+plt.hlines(y=0, xmin=min(y_test_pred), xmax=max(y_test_pred), colors='red')
+plt.xlabel('Predicted Values')
+plt.ylabel('Residuals')
+plt.title('Testing Set Residuals')
+
+plt.tight_layout()
+plt.show()
+
+metrics_df = pd.DataFrame(model_metrics).T
+
+plt.figure(figsize=(10, 6))
+metrics_df['RMSE'].sort_values().plot(kind='barh', color='skyblue')
+plt.title('Model Comparison (RMSE)')
+plt.xlabel('RMSE')
+plt.ylabel('Models')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+metrics_df['R²'].sort_values().plot(kind='barh', color='lightgreen')
+plt.title('Model Comparison (R²)')
+plt.xlabel('R²')
+plt.ylabel('Models')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+metrics_df['MAE'].sort_values().plot(kind='barh', color='lightcoral')
+plt.title('Model Comparison (MAE)')
+plt.xlabel('MAE')
+plt.ylabel('Models')
+plt.show()
+
+future_Inflation_Rate = 2
+future_Interest_Rate = 5
+future_GDP = 17967
+future_Applied = 2.3
+future_economic_data = np.array([[future_Inflation_Rate, future_Interest_Rate, future_GDP, future_Applied]])
+future_economic_data_scaled = scaler.transform(future_economic_data)
+
+for model_name, model in models.items():
+    future_gold_price = model.predict(future_economic_data_scaled)
+    print(f'Predicted Gold Price using {model_name}: {future_gold_price[0]}')
+
+plt.figure(figsize=(10, 6))
+plt.scatter(y_test, y_pred)
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linestyle='--')
+plt.xlabel('Actual Gold Prices')
+plt.ylabel('Predicted Gold Prices')
+plt.title('Predicted vs Actual Gold Prices')
+plt.show()
+
+```
+
 ## Output
 
-<!--Embed the Output picture at respective places as shown below as shown below-->
 #### Output1 - Login Page
 
 ![image](https://github.com/user-attachments/assets/8693e621-b029-4469-97b0-e6a393286531)
